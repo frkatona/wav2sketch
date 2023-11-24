@@ -25,15 +25,18 @@ def read_wav(filename):
     return raw_data, sample_rate, num_channels, sample_width, num_frames
 
 
-def format_for_c(raw_data, sample_rate, num_channels, sample_width, num_frames):
-    # assumes 16-bit audio
+def format_for_cpp(raw_data, sample_rate, num_channels, sample_width, num_frames):
+    # Assuming 16-bit audio
     fmt = "<" + "h" * (len(raw_data) // 2)
     audio_data = struct.unpack(fmt, raw_data)
 
-    # Format as C array
+    # Format as C array with 32-bit values
     c_array = []
-    for sample in audio_data:
-        c_array.append(f"0x{sample & 0xffff:04x}")
+    for i in range(0, len(audio_data), 2):
+        sample1 = audio_data[i] & 0xffff
+        sample2 = audio_data[i + 1] & 0xffff if i + 1 < len(audio_data) else 0
+        combined_sample = (sample1 << 16) | (sample2 & 0xffff)
+        c_array.append(f"0x{combined_sample:08X}")
     return c_array
 
 def write_to_file(c_array, filename, sample_rate):
@@ -55,7 +58,7 @@ def write_to_file(c_array, filename, sample_rate):
 
 def process_file(filename):
     raw_data, sample_rate, num_channels, sample_width, num_frames = read_wav(filename)
-    c_array = format_for_c(raw_data, sample_rate, num_channels, sample_width, num_frames)
+    c_array = format_for_cpp(raw_data, sample_rate, num_channels, sample_width, num_frames)
     write_to_file(c_array, filename, sample_rate)
 
 def main():
@@ -70,7 +73,7 @@ def main():
         if file.lower().endswith('.wav'):
             full_path = os.path.join(input_directory, file)
             raw_data, sample_rate, num_channels, sample_width, num_frames = read_wav(full_path)
-            c_array = format_for_c(raw_data, sample_rate, num_channels, sample_width, num_frames)
+            c_array = format_for_cpp(raw_data, sample_rate, num_channels, sample_width, num_frames)
             write_to_file(c_array, full_path, sample_rate)
             print("\n")
 

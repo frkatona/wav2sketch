@@ -1,1 +1,1 @@
-extern const unsigned int AudioSamplehatclosed_30[77820];
+extern const unsigned int AudioSamplehatclosed_30[38910];

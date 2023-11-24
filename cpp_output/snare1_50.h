@@ -1,1 +1,1 @@
-extern const unsigned int AudioSamplesnare1_50[148100];
+extern const unsigned int AudioSamplesnare1_50[74050];
